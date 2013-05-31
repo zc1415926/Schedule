@@ -1,0 +1,11 @@
+﻿<Window x:Class="Schedule_Test.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="MainWindow" Height="350" Width="525">
+    <Grid>
+        <Button x:Name="btnConvertExcel" Content="ConvertExcel" HorizontalAlignment="Left" Margin="165,139,0,0" VerticalAlignment="Top" Width="111" Height="39" Click="btnConvertExcel_Click"/>
+        <Button x:Name="btnCreateExcel" Content="CreateExcel" HorizontalAlignment="Left" Margin="165,231,0,0" VerticalAlignment="Top" Width="111" Height="32" Click="btnCreateExcel_Click"/>
+        <ProgressBar x:Name="probarConvertProgress" HorizontalAlignment="Left" Height="26" Margin="120,62,0,0" VerticalAlignment="Top" Width="292" Value="0"/>
+
+    </Grid>
+</Window>

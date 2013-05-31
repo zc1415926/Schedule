@@ -1,0 +1,12 @@
+f:\zhangchuan\documents\visual studio 2012\Projects\Schedule\Schedule_Test\bin\Debug\Schedule_Test.exe
+f:\zhangchuan\documents\visual studio 2012\Projects\Schedule\Schedule_Test\bin\Debug\Schedule_Test.pdb
+f:\zhangchuan\documents\visual studio 2012\Projects\Schedule\Schedule_Test\obj\Debug\Schedule_Test.csprojResolveAssemblyReference.cache
+f:\zhangchuan\documents\visual studio 2012\Projects\Schedule\Schedule_Test\obj\Debug\MainWindow.baml
+f:\zhangchuan\documents\visual studio 2012\Projects\Schedule\Schedule_Test\obj\Debug\MainWindow.g.cs
+f:\zhangchuan\documents\visual studio 2012\Projects\Schedule\Schedule_Test\obj\Debug\App.g.cs
+f:\zhangchuan\documents\visual studio 2012\Projects\Schedule\Schedule_Test\obj\Debug\Schedule_Test_MarkupCompile.cache
+f:\zhangchuan\documents\visual studio 2012\Projects\Schedule\Schedule_Test\obj\Debug\Schedule_Test.g.resources
+f:\zhangchuan\documents\visual studio 2012\Projects\Schedule\Schedule_Test\obj\Debug\Schedule_Test.Properties.Resources.resources
+f:\zhangchuan\documents\visual studio 2012\Projects\Schedule\Schedule_Test\obj\Debug\Schedule_Test.csproj.GenerateResource.Cache
+f:\zhangchuan\documents\visual studio 2012\Projects\Schedule\Schedule_Test\obj\Debug\Schedule_Test.exe
+f:\zhangchuan\documents\visual studio 2012\Projects\Schedule\Schedule_Test\obj\Debug\Schedule_Test.pdb
