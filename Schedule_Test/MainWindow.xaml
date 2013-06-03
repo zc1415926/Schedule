@@ -5,7 +5,7 @@
     <Grid>
         <Button x:Name="btnConvertExcel" Content="ConvertExcel" HorizontalAlignment="Left" Margin="165,139,0,0" VerticalAlignment="Top" Width="111" Height="39" Click="btnConvertExcel_Click"/>
         <Button x:Name="btnCreateExcel" Content="CreateExcel" HorizontalAlignment="Left" Margin="165,231,0,0" VerticalAlignment="Top" Width="111" Height="32" Click="btnCreateExcel_Click"/>
-        <ProgressBar x:Name="probarConvertProgress" HorizontalAlignment="Left" Height="26" Margin="120,62,0,0" VerticalAlignment="Top" Width="292" Value="0"/>
+        <ProgressBar x:Name="probarConvertProgress" HorizontalAlignment="Left" Height="26" Margin="120,62,0,0" VerticalAlignment="Top" Width="292" Value="0" IsIndeterminate="False"/>
 
     </Grid>
 </Window>

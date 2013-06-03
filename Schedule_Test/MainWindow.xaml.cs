@@ -12,6 +12,8 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
+using System.ComponentModel;
+
 using Excel = Microsoft.Office.Interop.Excel;
 
 namespace Schedule_Test
@@ -21,6 +23,8 @@ namespace Schedule_Test
     /// </summary>
     public partial class MainWindow : Window
     {
+        private BackgroundWorker backgroundWorker;
+
         private Excel.Application xlApp;
         private Excel.Workbook xlWb;
         private Excel.Worksheet xlWs;
@@ -30,19 +34,38 @@ namespace Schedule_Test
         private Excel.Workbook targetXlWb;
         private Excel.Worksheet targetXlWs;
 
+        private Excel.Workbook resultScheduleWb;
+        private Excel.Worksheet resultScheduleWs;
+
+        private object misValue;
 
 
         public MainWindow()
         {
             InitializeComponent();
 
-            
-        
+            backgroundWorker = new BackgroundWorker();
+            backgroundWorker.WorkerReportsProgress = true;
+            backgroundWorker.WorkerSupportsCancellation = true;
+            backgroundWorker.DoWork += new DoWorkEventHandler(backgroundWorker1_DoWork);
+            backgroundWorker.ProgressChanged += new ProgressChangedEventHandler(backgroundWorker1_ProgressChanged);
+            backgroundWorker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(backgroundWorker1_RunWorkerCompleted);
+
+            misValue = System.Reflection.Missing.Value;
         }
 
         private void btnConvertExcel_Click(object sender, RoutedEventArgs e)
         {
-            
+            if (backgroundWorker.IsBusy != true)
+            {
+                backgroundWorker.RunWorkerAsync();
+            }
+        }
+
+        private void backgroundWorker1_DoWork(object sender, DoWorkEventArgs e)
+        {
+            BackgroundWorker worker = sender as BackgroundWorker;
+
             Microsoft.Win32.OpenFileDialog openFileDialog = new Microsoft.Win32.OpenFileDialog();
             //openFileDialog.FileName = "Document";
             openFileDialog.DefaultExt = ".xls";
@@ -51,6 +74,8 @@ namespace Schedule_Test
             Nullable<bool> result = openFileDialog.ShowDialog();
             if (result == true)
             {
+                backgroundWorker.ReportProgress(0);
+
                 xlFilePath = openFileDialog.FileName;
 
                 xlApp = new Excel.Application();
@@ -62,11 +87,49 @@ namespace Schedule_Test
                 range = xlWs.UsedRange;
                 //MessageBox.Show("Rows: " + range.Rows.Count + "\n" + "Columns: " + range.Columns.Count);
 
+                
+
                 SegmentExcelIntoLineOfRange(range, range.Rows.Count, range.Columns.Count);
 
                 //xlWb.Close(true, null, null);
-               // xlApp.Quit();
+                // xlApp.Quit();
             }
+
+        }
+
+
+
+        private void backgroundWorker1_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        {
+            //resultLabel.Content = (e.ProgressPercentage.ToString() + "%");
+            if (e.ProgressPercentage == 0)
+            {
+                probarConvertProgress.IsIndeterminate = true;
+            }
+            else if(e.ProgressPercentage == 100)
+            {
+                probarConvertProgress.IsIndeterminate = false;
+            }
+          //MessageBox.Show(e.ProgressPercentage.ToString());
+        }
+
+        private void backgroundWorker1_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+           /* if (e.Cancelled == true)
+            {
+                //resultLabel.Content = "Canceled!";
+                MessageBox.Show("Canceled!");
+            }
+            else if (e.Error != null)
+            {
+                MessageBox.Show(e.Error.Message);
+               // resultLabel.Content = "Error: " + e.Error.Message;
+            }
+            else
+            {
+                MessageBox.Show("Done!");
+                //resultLabel.Content = "Done!";
+            }*/
         }
 
         private void SegmentExcelIntoLineOfRange(Excel.Range range, int rCount, int cCount)
@@ -78,7 +141,7 @@ namespace Schedule_Test
             //临时存储一行首列的人名，解析其它
             //如遇下一行中没有人名，则使用上边的人名
 
-
+            
             int rowCount, colCount;
             string teacherName = "";
             string gradeNum = "";
@@ -89,7 +152,7 @@ namespace Schedule_Test
             //遍历老师一列、年级一列、任课班级一列
             for (rowCount = 1; rowCount < rCount + 1; rowCount++)
             {
-                //probarConvertProgress.SetValue(rowCount / rCount);
+                
 
                 r = range.Rows[rowCount];
                 //老师一列
@@ -134,21 +197,24 @@ namespace Schedule_Test
 
             //把一位老师在一门课中的多个班级的分成一个班级一行
             Excel.Range tempR;
-            object misValue = System.Reflection.Missing.Value;
 
+            int timesPerWeek = 0;
            for (rowCount = 1; rowCount < rCount + 1; rowCount++)
             {
-               // probarConvertProgress.Value = rowCount / rCount * 0.5;
+                //probarConvertProgress.Value =  40 + rowCount / rCount * 0.6;
 
                 //Excel.Range r = range.Rows[rowCount];
                 r = range.Rows[rowCount];
                 classList = r.Columns[5].Value2.ToString();
                 //MessageBox.Show(classList);
-               classArray = classList.Split(stringSeparators, StringSplitOptions.RemoveEmptyEntries);
+                classArray = classList.Split(stringSeparators, StringSplitOptions.RemoveEmptyEntries);
  
                 int classArrayLength = classArray.Length;
                 if (classArrayLength > 1)
                 {
+                    //周总课时
+                    timesPerWeek = (int)((int)(r.Columns[4].Value2 / classArrayLength));
+
                     for (int arrayI = 0; arrayI < classArrayLength; arrayI++)
                     {
                         //MessageBox.Show("classArray[" + arrayI + "]: " + classArray[arrayI]);
@@ -173,13 +239,26 @@ namespace Schedule_Test
                             tempR.Columns[1].Value2 = r.Columns[1].Value2;
                             tempR.Columns[2].Value2 = r.Columns[2].Value2;
                             tempR.Columns[3].Value2 = r.Columns[3].Value2;
-                            tempR.Columns[4].Value2 = r.Columns[4].Value2;
+                            //周总课时
+                            //timesPerWeek = (int)((int)(r.Columns[4].Value2 / classArrayLength));
+                            tempR.Columns[4].Value2 = timesPerWeek;
+                            //这句话效率低，如果有二个以上班级，下边一句会冗余多次执行
+                            range.Rows[rowCount+1].Columns[4].Value2 = timesPerWeek;
+
                             tempR.Columns[5].Value2 = classArray[arrayI];
 
                             rowCount++;
                             //新插入行了，总行数当然也要增加
                             rCount++;
+
+                            //if (rowCount == rCount - 1)
+                            //{
+                            //    range.Rows[rowCount + 1].Columns[4].Value2 = timesPerWeek;
+                            //}
                         }
+
+                        
+
                     }
                     
                 }
@@ -249,20 +328,27 @@ namespace Schedule_Test
                 }
             }*/
             
-            xlWb.SaveAs("e:\\saved01.xls", Excel.XlFileFormat.xlWorkbookNormal, misValue, misValue, misValue, misValue, Excel.XlSaveAsAccessMode.xlExclusive);
-            xlWb.Close(true);
-            xlApp.Quit();
-            MessageBox.Show("Done!");
+            //xlWb.SaveAs("e:\\saved01.xls", Excel.XlFileFormat.xlWorkbookNormal, misValue, misValue, misValue, misValue, Excel.XlSaveAsAccessMode.xlExclusive);
+           // xlWb.Close(true);
+            //xlApp.Quit();
+            range = xlWs.UsedRange;
+            //MessageBox.Show("count: " + range.Rows.Count.ToString());
+            CreateTargetExcel(range, range.Rows.Count);
+
+            //MessageBox.Show("Done!");
         }
 
-        private void btnCreateExcel_Click(object sender, RoutedEventArgs e)
+        private void CreateTargetExcel(Excel.Range range, int rCount)
         {
-            object misValue = System.Reflection.Missing.Value;
             string fileSavePath = "";
 
             targetXlApp = new Excel.Application();
             targetXlWb = targetXlApp.Workbooks.Add();
+            resultScheduleWb = targetXlApp.Workbooks.Add();
             targetXlWs = (Excel.Worksheet)targetXlWb.Worksheets.get_Item(1);
+            resultScheduleWs = (Excel.Worksheet)resultScheduleWb.Worksheets.get_Item(1);
+
+            /* 生成“教学计划” */
             //Cells的行和列都要从1号开始
             targetXlWs.Cells[1, 1] = "年级";
             targetXlWs.Cells[1, 2] = "班级";
@@ -275,6 +361,68 @@ namespace Schedule_Test
             targetXlWs.Cells[1, 9] = "课程性质";
             targetXlWs.Cells[1, 10] = "所在校区";
 
+            int rowCount;
+            Excel.Range r;
+            System.DateTime dateTime = System.DateTime.Now;
+            //yearGrad减去201X级的序号就可以得到当前是几年级
+            int yearGrad = dateTime.Year+6;
+            int grade = 0;
+            string gradeString = "";
+
+            //令rowCount的初值为2跳过静养一行,"rCount - 1"是要去掉表尾的合计一行
+            for (rowCount = 2; rowCount < rCount - 1; rowCount++)
+            {
+                r = range.Rows[rowCount];
+                
+                //年级
+                grade = yearGrad - Int32.Parse(r.Columns[2].Value2.ToString());
+
+                switch (grade)
+                {
+                    case 6:
+                        gradeString = "六年级";
+                        targetXlWs.Cells[rowCount, 1] = "六年级";
+                        break;
+                    case 5:
+                        gradeString = "五年级";
+                        targetXlWs.Cells[rowCount, 1] = "五年级";
+                        break;
+                    case 4:
+                        gradeString = "四年级";
+                        targetXlWs.Cells[rowCount, 1] = "四年级";
+                        break;
+                    case 3:
+                        gradeString = "三年级";
+                        targetXlWs.Cells[rowCount, 1] = "三年级";
+                        break;
+                    case 2:
+                        gradeString = "二年级";
+                        targetXlWs.Cells[rowCount, 1] = "二年级";
+                        break;
+                    case 1:
+                        gradeString = "一年级";
+                        targetXlWs.Cells[rowCount, 1] = "一年级";
+                        break;
+                }
+
+                //班级
+                targetXlWs.Cells[rowCount, 2] = gradeString + "(" + r.Columns[5].Value2.ToString() + ")";
+                
+                //课程
+                targetXlWs.Cells[rowCount, 3] = r.Columns[3].Value2.ToString();
+
+                //教师
+                targetXlWs.Cells[rowCount, 4] = r.Columns[1].Value2.ToString();
+
+                //周课时
+                targetXlWs.Cells[rowCount, 6] = r.Columns[4].Value2.ToString();
+
+                //所在校区
+                targetXlWs.Cells[rowCount, 10] = "人和街小学";
+            }
+
+             
+
 
             Microsoft.Win32.SaveFileDialog saveFileDialog = new Microsoft.Win32.SaveFileDialog();
             saveFileDialog.Filter = "XLS文件（*.xls）|*.xls";
@@ -285,12 +433,63 @@ namespace Schedule_Test
                 fileSavePath = saveFileDialog.FileName.ToString();
 
 
-                targetXlWb.SaveAs(fileSavePath, Excel.XlFileFormat.xlWorkbookNormal, misValue, misValue, misValue, misValue, Excel.XlSaveAsAccessMode.xlExclusive);
-                targetXlWb.Close(true);
+                targetXlWb.SaveAs(fileSavePath, 
+                                  Excel.XlFileFormat.xlWorkbookNormal, 
+                                  misValue, 
+                                  misValue, 
+                                  misValue, 
+                                  misValue, 
+                                  Excel.XlSaveAsAccessMode.xlExclusive);
+                targetXlWb.Close(false);
                 targetXlApp.Quit();
-                MessageBox.Show("Excel file Saved!");
+                //MessageBox.Show("Excel file Saved!");
             }
+
+            xlWb.Close(false);
+            xlApp.Quit();
+
+            //probarConvertProgress.IsIndeterminate = false;
+
+
+            backgroundWorker.ReportProgress(100);
+            MessageBox.Show("All work Donw!");
         }
+
+        //private void btnCreateExcel_Click(object sender, RoutedEventArgs e)
+        //{
+        //    string fileSavePath = "";
+
+        //    targetXlApp = new Excel.Application();
+        //    targetXlWb = targetXlApp.Workbooks.Add();
+        //    targetXlWs = (Excel.Worksheet)targetXlWb.Worksheets.get_Item(1);
+        //    //Cells的行和列都要从1号开始
+        //    targetXlWs.Cells[1, 1] = "年级";
+        //    targetXlWs.Cells[1, 2] = "班级";
+        //    targetXlWs.Cells[1, 3] = "课程";
+        //    targetXlWs.Cells[1, 4] = "教师";
+        //    targetXlWs.Cells[1, 5] = "场地";
+        //    targetXlWs.Cells[1, 6] = "周课时";
+        //    targetXlWs.Cells[1, 7] = "每周连课次数";
+        //    targetXlWs.Cells[1, 8] = "每次连课节数";
+        //    targetXlWs.Cells[1, 9] = "课程性质";
+        //    targetXlWs.Cells[1, 10] = "所在校区";
+
+
+        //    Microsoft.Win32.SaveFileDialog saveFileDialog = new Microsoft.Win32.SaveFileDialog();
+        //    saveFileDialog.Filter = "XLS文件（*.xls）|*.xls";
+        //    saveFileDialog.FilterIndex = 2;
+        //    saveFileDialog.RestoreDirectory = true;
+        //    if (saveFileDialog.ShowDialog() == true)
+        //    {
+        //        fileSavePath = saveFileDialog.FileName.ToString();
+
+
+        //        targetXlWb.SaveAs(fileSavePath, Excel.XlFileFormat.xlWorkbookNormal, misValue, misValue, misValue, misValue, Excel.XlSaveAsAccessMode.xlExclusive);
+        //        targetXlWb.Close(true);
+        //        targetXlApp.Quit();
+        //        MessageBox.Show("Excel file Saved!");
+        //    }
+        //}
 
         private void ProgressBar_ValueChanged_1(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
