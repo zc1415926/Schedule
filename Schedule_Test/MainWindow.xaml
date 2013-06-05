@@ -3,9 +3,10 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="MainWindow" Height="350" Width="525">
     <Grid>
-        <Button x:Name="btnConvertExcel" Content="ConvertExcel" HorizontalAlignment="Left" Margin="165,139,0,0" VerticalAlignment="Top" Width="111" Height="39" Click="btnConvertExcel_Click"/>
-        <ProgressBar x:Name="probarConvertProgress" HorizontalAlignment="Left" Height="26" Margin="120,62,0,0" VerticalAlignment="Top" Width="292" Value="0" IsIndeterminate="False"/>
-        <Button x:Name="btnOpenAllSchoolSchedule" Content="打开全校总课表" HorizontalAlignment="Left" Margin="165,183,0,0" VerticalAlignment="Top" Width="111" Height="38" Click="btnOpenAllSchoolSchedule_Click"/>
+        <Button x:Name="btnConvertExcel" Content="生成教学计划" HorizontalAlignment="Left" Margin="49,139,0,0" VerticalAlignment="Top" Width="227" Height="39" Click="btnConvertExcel_Click"/>
+        <ProgressBar x:Name="probarConvertProgress" HorizontalAlignment="Left" Height="26" Margin="10,10,0,0" VerticalAlignment="Top" Width="292" Value="0" IsIndeterminate="False"/>
+        <Button x:Name="btnOpenAllSchoolSchedule" Content="打开全校总课表->生成排课结果" HorizontalAlignment="Left" Margin="49,183,0,0" VerticalAlignment="Top" Width="227" Height="38" Click="btnOpenAllSchoolSchedule_Click"/>
+        <TextBox x:Name="txtTextBox" HorizontalAlignment="Left" Height="300" Margin="337,10,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="170" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"/>
 
     </Grid>
 </Window>

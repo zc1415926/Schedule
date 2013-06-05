@@ -25,6 +25,7 @@ namespace Schedule_Test
     public partial class MainWindow : Window
     {
         private BackgroundWorker backgroundWorker;
+        private BackgroundWorker allSchoolScheduleBW;
 
         private Excel.Application xlApp;
         private Excel.Workbook xlWb;
@@ -41,9 +42,10 @@ namespace Schedule_Test
 
         private Excel.Workbook resultScheduleWb;
         private Excel.Worksheet resultScheduleWs;
+        private int resultScheduleLineNum;
 
 
-        private CommonOpenFileDialog openFolderDialog;// = new CommonOpenFileDialog();
+       // private CommonOpenFileDialog openFolderDialog;// = new CommonOpenFileDialog();
 
         private object misValue;
 
@@ -65,6 +67,13 @@ namespace Schedule_Test
             backgroundWorker.DoWork += new DoWorkEventHandler(backgroundWorker1_DoWork);
             backgroundWorker.ProgressChanged += new ProgressChangedEventHandler(backgroundWorker1_ProgressChanged);
             backgroundWorker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(backgroundWorker1_RunWorkerCompleted);
+
+            allSchoolScheduleBW = new BackgroundWorker();
+            allSchoolScheduleBW.WorkerReportsProgress = true;
+            allSchoolScheduleBW.WorkerSupportsCancellation = true;
+            allSchoolScheduleBW.DoWork += new DoWorkEventHandler(allSchoolScheduleBW_DoWork);
+            allSchoolScheduleBW.ProgressChanged += new ProgressChangedEventHandler(allSchoolScheduleBW_ProgressChanged);
+            allSchoolScheduleBW.RunWorkerCompleted += new RunWorkerCompletedEventHandler(allSchoolScheduleBW_RunWorkerCompleted);
 
             misValue = System.Reflection.Missing.Value;
         }
@@ -92,7 +101,7 @@ namespace Schedule_Test
                 commonFileDialogResult = openFileDialog.ShowDialog();
             }));
 
-            openFolderDialog = new CommonOpenFileDialog();
+            //openFolderDialog = new CommonOpenFileDialog();
 
             //Microsoft.Win32.OpenFileDialog openFileDialog = new Microsoft.Win32.OpenFileDialog();
             //openFileDialog.FileName = "Document";
@@ -392,14 +401,7 @@ namespace Schedule_Test
             targetXlWs.Cells[1, 9] = "课程性质";
             targetXlWs.Cells[1, 10] = "所在校区";
 
-            /* 生成“排课结果” */
-            resultScheduleWs.Cells[1, 1] = "年级";
-            resultScheduleWs.Cells[1, 2] = "班级";
-            resultScheduleWs.Cells[1, 3] = "课程";
-            resultScheduleWs.Cells[1, 4] = "教师";
-            resultScheduleWs.Cells[1, 5] = "场地";
-            resultScheduleWs.Cells[1, 6] = "星期";
-            resultScheduleWs.Cells[1, 7] = "节次";
+            
 
 
             int rowCount;
@@ -423,46 +425,46 @@ namespace Schedule_Test
                     case 6:
                         gradeString = "六年级";
                         targetXlWs.Cells[rowCount, 1] = "六年级";
-                        resultScheduleWs.Cells[rowCount, 1] = "六年级";
+                        //resultScheduleWs.Cells[rowCount, 1] = "六年级";
                         break;
                     case 5:
                         gradeString = "五年级";
                         targetXlWs.Cells[rowCount, 1] = "五年级";
-                        resultScheduleWs.Cells[rowCount, 1] = "五年级";
+                        //resultScheduleWs.Cells[rowCount, 1] = "五年级";
                         break;
                     case 4:
                         gradeString = "四年级";
                         targetXlWs.Cells[rowCount, 1] = "四年级";
-                        resultScheduleWs.Cells[rowCount, 1] = "四年级";
+                        //resultScheduleWs.Cells[rowCount, 1] = "四年级";
                         break;
                     case 3:
                         gradeString = "三年级";
                         targetXlWs.Cells[rowCount, 1] = "三年级";
-                        resultScheduleWs.Cells[rowCount, 1] = "三年级";
+                        //resultScheduleWs.Cells[rowCount, 1] = "三年级";
                         break;
                     case 2:
                         gradeString = "二年级";
                         targetXlWs.Cells[rowCount, 1] = "二年级";
-                        resultScheduleWs.Cells[rowCount, 1] = "二年级";
+                        //resultScheduleWs.Cells[rowCount, 1] = "二年级";
                         break;
                     case 1:
                         gradeString = "一年级";
                         targetXlWs.Cells[rowCount, 1] = "一年级";
-                        resultScheduleWs.Cells[rowCount, 1] = "一年级";
+                        //resultScheduleWs.Cells[rowCount, 1] = "一年级";
                         break;
                 }
 
                 //班级
                 targetXlWs.Cells[rowCount, 2] = gradeString + "(" + r.Columns[5].Value2.ToString() + ")";
-                resultScheduleWs.Cells[rowCount, 2] = gradeString + "(" + r.Columns[5].Value2.ToString() + ")";
+                //resultScheduleWs.Cells[rowCount, 2] = gradeString + "(" + r.Columns[5].Value2.ToString() + ")";
                 
                 //课程
                 targetXlWs.Cells[rowCount, 3] = r.Columns[3].Value2.ToString();
-                resultScheduleWs.Cells[rowCount, 3] = r.Columns[3].Value2.ToString();
+                //resultScheduleWs.Cells[rowCount, 3] = r.Columns[3].Value2.ToString();
 
                 //教师
                 targetXlWs.Cells[rowCount, 4] = r.Columns[1].Value2.ToString();
-                resultScheduleWs.Cells[rowCount, 4] = r.Columns[1].Value2.ToString();
+                //resultScheduleWs.Cells[rowCount, 4] = r.Columns[1].Value2.ToString();
 
                 //周课时
                 targetXlWs.Cells[rowCount, 6] = r.Columns[4].Value2.ToString();
@@ -470,15 +472,14 @@ namespace Schedule_Test
                 //所在校区
                 targetXlWs.Cells[rowCount, 10] = "人和街小学";
 
-                resultScheduleWs.Cells[rowCount, 5] = "自动";
+                //resultScheduleWs.Cells[rowCount, 5] = "自动";
                // resultScheduleWs.Cells[rowCount, 6] = "星期X";
                // resultScheduleWs.Cells[rowCount, 7]
 
 
             }
-            
-                
-            //openFolderDialog.in
+
+            CommonOpenFileDialog openFolderDialog = new CommonOpenFileDialog();
             openFolderDialog.IsFolderPicker = true;
             openFolderDialog.Title = "选择文件保存目录";
             //openFolderDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
@@ -500,8 +501,16 @@ namespace Schedule_Test
                                   misValue,
                                   misValue,
                                   Excel.XlSaveAsAccessMode.xlExclusive);
+
+                /*resultScheduleWb.SaveAs(fileSavePath + "排课结果" + dateTime.Year + dateTime.Month + dateTime.Day + dateTime.Hour + dateTime.Minute + ".xls",
+                                  Excel.XlFileFormat.xlWorkbookNormal,
+                                  misValue,
+                                  misValue,
+                                  misValue,
+                                  misValue,
+                                  Excel.XlSaveAsAccessMode.xlExclusive);*/
                 targetXlWb.Close(false);
-                resultScheduleWb.Close(false);
+                //resultScheduleWb.Close(false);
                 targetXlApp.Quit();
             }
 
@@ -540,13 +549,21 @@ namespace Schedule_Test
 
         private void ReadAllSchoolSchedule()
         {
-            Microsoft.Win32.OpenFileDialog openFileDialog = new Microsoft.Win32.OpenFileDialog();
-            //openFileDialog.FileName = "Document";
-            openFileDialog.DefaultExt = ".xls";
-            openFileDialog.Filter = "XLS文件（*.xls）|*.xls";
+            //在rhjxx33.xls中每个人对应的一行单独制成一个WorkSheet(可怜的表呀，第一范式也不满足)
+            //NO!!!!!!不制成WorkSheet使用List<List<string>>即二维字符串List
+            //不对，用数组什么的就不能使行或列的表头有意义了，还有是用
+            //嗯。。。找到的更好的解决办法Dictionary
+            CommonOpenFileDialog openFileDialog = new CommonOpenFileDialog();
+            CommonFileDialogFilter filter = new CommonFileDialogFilter("*.xls文件", ".xls");
+            openFileDialog.Filters.Add(filter);
+            CommonFileDialogResult commonFileDialogResult = CommonFileDialogResult.None;
 
-            Nullable<bool> result = openFileDialog.ShowDialog();
-            if (result == true)
+            App.Current.Dispatcher.Invoke(new Action(() =>
+            {
+                commonFileDialogResult = openFileDialog.ShowDialog();
+            }));
+
+            if (commonFileDialogResult == CommonFileDialogResult.Ok)
             {
                 xlFilePath = openFileDialog.FileName;
 
@@ -562,16 +579,228 @@ namespace Schedule_Test
 
                 rCount = range.Rows.Count;
                 cCount = range.Columns.Count;
+                MessageBox.Show("rCount: " + rCount +
+                                "cCount: " + cCount);
 
-                MessageBox.Show("rCount: " + rCount + "\n" + "cCount: " + cCount);
+                //这里先试试一个人的
+               // Dictionary<string, string> dicSchedule = new Dictionary<string, string>();
+               // rowCount = 4;
+                string cellString = "";
+                //string tempGradeClass = "";
+                //string tempSubject = "";
+                string[] tempSplitArry;
+                int tempWeek;
+                int tempYear = System.DateTime.Now.Year;
+                Excel.Range tempResultRange;
+
+               // targetXlApp = new Excel.Application();
+
+               // targetXlWb = targetXlApp.Workbooks.Add();
+                //resultScheduleWb = targetXlApp.Workbooks.Add();
+
+                //targetXlWs = (Excel.Worksheet)targetXlWb.Worksheets.get_Item(1);
+               // resultScheduleWs = (Excel.Worksheet)resultScheduleWb.Worksheets.get_Item(1);
+
+                resultScheduleWb = allSchoolScheduleApp.Workbooks.Add();
+                resultScheduleWs = (Excel.Worksheet)resultScheduleWb.Worksheets.get_Item(1);
+                /* 生成“排课结果” */
+                resultScheduleWs.Cells[1, 1] = "年级";
+                resultScheduleWs.Cells[1, 2] = "班级";
+                resultScheduleWs.Cells[1, 3] = "课程";
+                resultScheduleWs.Cells[1, 4] = "教师";
+                resultScheduleWs.Cells[1, 5] = "场地";
+                resultScheduleWs.Cells[1, 6] = "星期";
+                resultScheduleWs.Cells[1, 7] = "节次";
+                resultScheduleLineNum = 2;
+
+                for (rowCount = 4; rowCount < rCount; rowCount++ )
+                {
+                    //colCount = 2是为了避过姓名一列,colCount是从1号开始的cCount要加一
+                    for (int colCount = 2; colCount < cCount + 1; colCount++)
+                    {
+
+                        if (range.Rows[rowCount].Columns[colCount].Value2 != null)
+                        {
+                            cellString = range.Rows[rowCount].Columns[colCount].Value2.ToString();
+                            cellString = cellString.Replace("\n", ".");
+                            tempSplitArry = cellString.Split('.');
+
+                            tempResultRange = resultScheduleWs.Rows[resultScheduleLineNum];
+
+                            //写入“排课结果的年级、班级两列
+                            switch (tempSplitArry[0])
+                            {
+                                case "小六":
+                                    tempResultRange.Columns[1].Value2 =
+                                        "六年级";
+                                    tempResultRange.Columns[2].Value2 =
+                                        "六年级(" + tempSplitArry[1] + ")";
+                                    //tempGradeClass = ((tempYear + 6) - 6) + tempSplitArry[1];
+                                    break;
+                                case "小五":
+                                    tempResultRange.Columns[1].Value2 =
+                                        "五年级";
+                                    tempResultRange.Columns[2].Value2 =
+                                        "五年级(" + tempSplitArry[1] + ")";
+                                    //tempGradeClass = ((tempYear + 6) - 5) + tempSplitArry[1];
+                                    break;
+                                case "小四":
+                                    tempResultRange.Columns[1].Value2 =
+                                        "四年级";
+                                    tempResultRange.Columns[2].Value2 =
+                                        "四年级(" + tempSplitArry[1] + ")";
+                                    //tempGradeClass = ((tempYear + 6) - 4) + tempSplitArry[1];
+                                    break;
+                                case "小三":
+                                    tempResultRange.Columns[1].Value2 =
+                                        "三年级";
+                                    tempResultRange.Columns[2].Value2 =
+                                        "三年级(" + tempSplitArry[1] + ")";
+                                    //tempGradeClass = ((tempYear + 6) - 3) + tempSplitArry[1];
+                                    break;
+                                case "小二":
+                                    tempResultRange.Columns[1].Value2 =
+                                        "二年级";
+                                    tempResultRange.Columns[2].Value2 =
+                                        "二年级(" + tempSplitArry[1] + ")";
+                                    //tempGradeClass = ((tempYear + 6) - 2) + tempSplitArry[1];
+                                    break;
+                                case "小一":
+                                    tempResultRange.Columns[1].Value2 =
+                                        "一年级";
+                                    tempResultRange.Columns[2].Value2 =
+                                        "一年级(" + tempSplitArry[1] + ")";
+                                    //tempGradeClass = ((tempYear + 6) - 1) + tempSplitArry[1];
+                                    break;
+                            }
+
+                            //写入课程
+                            tempResultRange.Columns[3].Value2 = tempSplitArry[2];
+
+                            //写入教师
+                            tempResultRange.Columns[4].Value2 = range.Rows[rowCount].Columns[1].Value2;
+
+                            //写入场地
+                            tempResultRange.Columns[5].Value2 = "自动";
+
+                            //写入星期
+                            tempWeek = Int32.Parse(Math.Ceiling((colCount - 1F) / 6F).ToString());
+                            switch (tempWeek)
+                            {
+                                case 1:
+                                    tempResultRange.Columns[6].Value2 = "星期一";
+                                    //tempGradeClass += ".星期一";
+                                    break;
+                                case 2:
+                                    tempResultRange.Columns[6].Value2 = "星期二";
+                                    //tempGradeClass += ".星期二";
+                                    break;
+                                case 3:
+                                    tempResultRange.Columns[6].Value2 = "星期三";
+                                    //tempGradeClass += ".星期三";
+                                    break;
+                                case 4:
+                                    tempResultRange.Columns[6].Value2 = "星期四";
+                                    //tempGradeClass += ".星期四";
+                                    break;
+                                case 5:
+                                    tempResultRange.Columns[6].Value2 = "星期五";
+                                    //tempGradeClass += ".星期五";
+                                    break;
+
+
+                            }
+                            //写入节次
+                            tempResultRange.Columns[7].Value2 = range.Rows[3].Columns[colCount].Value2;
+
+                            //tempSubject = tempSplitArry[2];
+                            //这里还有一个星期几的问题没有解决，如：周长胜一行中星期一第一节和星期二第一节一样，Dictionary会报错：same Key!!!
+                            //dicSchedule.Add(tempGradeClass, tempSubject);
+                            /*if (tempResultRange.Columns[4].Value2.ToString() == "刘培珍")
+                            {
+                                MessageBox.Show("" + tempResultRange.Columns[1].Value2.ToString() +
+                                                " " + tempResultRange.Columns[2].Value2.ToString() +
+                                                " " + tempResultRange.Columns[3].Value2.ToString() +
+                                                " " + tempResultRange.Columns[4].Value2.ToString() +
+                                                " " + tempResultRange.Columns[5].Value2.ToString() +
+                                                " " + tempResultRange.Columns[6].Value2.ToString() +
+                                                " " + tempResultRange.Columns[7].Value2.ToString()
+
+
+                                    );
+                            }*/
+                            resultScheduleLineNum++;
+                        }
+                       /* else
+                        {
+                           // dicSchedule.Add("[" + rowCount.ToString() + "." + colCount.ToString() + "]", "");
+                        }*/
+                    }
+                    App.Current.Dispatcher.Invoke(new Action(() =>
+                    {
+                        txtTextBox.Text += range.Rows[rowCount].Columns[1].Value2.ToString() + "\n";
+                        txtTextBox.ScrollToEnd();
+                    }));
+                    
+                }
+
+                CommonOpenFileDialog openFolderDialog = new CommonOpenFileDialog();
+                openFolderDialog.IsFolderPicker = true;
+                openFolderDialog.Title = "选择文件保存目录";
+                //openFolderDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
+                commonFileDialogResult = CommonFileDialogResult.None;
+                App.Current.Dispatcher.Invoke(new Action(() =>
+                {
+                    commonFileDialogResult = openFolderDialog.ShowDialog();
+                }));
+
+
+                if (commonFileDialogResult == CommonFileDialogResult.Ok)
+                {
+                    string fileSavePath = openFolderDialog.FileName;
+                    System.DateTime dateTime = System.DateTime.Now;
+                    resultScheduleWb.SaveAs(fileSavePath + "排课结果" + dateTime.Year + dateTime.Month + dateTime.Day + dateTime.Hour + dateTime.Minute + ".xls",
+                                      Excel.XlFileFormat.xlWorkbookNormal,
+                                      misValue,
+                                      misValue,
+                                      misValue,
+                                      misValue,
+                                      Excel.XlSaveAsAccessMode.xlExclusive);
+
+                    resultScheduleWb.Close(false);
+                    allSchoolScheduleWb.Close(false);
+                    allSchoolScheduleApp.Quit();
+                }
+
+                //for (rowCount = 4; rowCount < rCount; rowCount++)
+                //{
+ 
+                //}
+
+                /*MessageBox.Show("rCount: " + rCount + "\n" + "cCount: " + cCount);
 
                 for (rowCount = 1; rowCount < rCount; rowCount++)
                 {
                     Excel.Range r = range.Rows[rowCount];
-                }
+                }*/
+
+                MessageBox.Show("Done!");
             }
         }
 
+        private void allSchoolScheduleBW_DoWork(object sender, DoWorkEventArgs e)
+        {
+            ReadAllSchoolSchedule();
+        }
+
+        private void allSchoolScheduleBW_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        { 
+        }
+
+        private void allSchoolScheduleBW_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            MessageBox.Show("allSchoolScheduleBW Done!");
+        }
 
         //private void btnCreateExcel_Click(object sender, RoutedEventArgs e)
         //{
@@ -616,7 +845,11 @@ namespace Schedule_Test
 
         private void btnOpenAllSchoolSchedule_Click(object sender, RoutedEventArgs e)
         {
-            Excel.Application allSchoolScheduleApp;
+            if (allSchoolScheduleBW.IsBusy != true)
+            {
+                allSchoolScheduleBW.RunWorkerAsync();
+            }
+           /* Excel.Application allSchoolScheduleApp;
             Excel.Workbook allSchoolScheduleWb;
             Excel.Worksheet allSchoolScheduleWs;
 
@@ -665,7 +898,7 @@ namespace Schedule_Test
 
 
 
-            
+            */
         }
 
 
