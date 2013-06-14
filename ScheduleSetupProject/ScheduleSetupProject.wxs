@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+    <Fragment>
+        <DirectoryRef Id="ScheduleSetupProject.Binaries">
+            <Component Id="cmp24B2D6AC3F9F1ED68703D25E3B6C5C0F" Guid="*">
+                <File Id="fil1180FCF23D4DBFDA6C179333EB8441AF" Source="$(var.ScheduleSetupProject.TargetDir)\ScheduleSetupProject.msi" />
+            </Component>
+        </DirectoryRef>
+    </Fragment>
+    <Fragment>
+        <ComponentGroup Id="ScheduleSetupProject.Binaries">
+            <ComponentRef Id="cmp24B2D6AC3F9F1ED68703D25E3B6C5C0F" />
+        </ComponentGroup>
+    </Fragment>
+</Wix>
