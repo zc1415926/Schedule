@@ -119,7 +119,7 @@ namespace Schedule_Test
 
                 range = xlWs.UsedRange;
 
-                SegmentExcelIntoLineOfRange(range, range.Rows.Count, range.Columns.Count);
+                SegmentExcelIntoLineOfRange(range, range.Rows.Count/*, range.Columns.Count*/);
             }
 
         }
@@ -156,7 +156,7 @@ namespace Schedule_Test
             }*/
         }
 
-        private void SegmentExcelIntoLineOfRange(Excel.Range range, int rCount, int cCount)
+        private void SegmentExcelIntoLineOfRange(Excel.Range range, int rCount/*, int cCount*/)
         {
             //先对123.xls文件作一次预处理，把它转成更易于解析的形式
             //一行一行的解析
@@ -496,14 +496,14 @@ namespace Schedule_Test
 
                 rCount = range.Rows.Count;
                 cCount = range.Columns.Count;
-                MessageBox.Show("rCount: " + rCount +
-                                "cCount: " + cCount);
+               /* MessageBox.Show("rCount: " + rCount +
+                                "cCount: " + cCount);*/
 
                 //这里先试试一个人的
                 string cellString = "";
                 string[] tempSplitArry;
                 int tempWeek;
-                int tempYear = System.DateTime.Now.Year;
+                //int tempYear = System.DateTime.Now.Year;
                 Excel.Range tempResultRange;
 
                 resultScheduleWb = allSchoolScheduleApp.Workbooks.Add();
@@ -583,7 +583,7 @@ namespace Schedule_Test
                             tempResultRange.Columns[5].Value2 = "自动";
 
                             //写入星期
-                            tempWeek = Int32.Parse(Math.Ceiling((colCount - 1F) / 6F).ToString());
+                            tempWeek = int.Parse(Math.Ceiling((colCount - 1F) / 6F).ToString());
                             switch (tempWeek)
                             {
                                 case 1:
