@@ -35,16 +35,40 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="ICSharpCode.SharpZipLib">
+      <HintPath>F:\Downloads\Software\DotNetLibrary\npoi 2.0.1 (beta1)\npoi\dotnet4\ICSharpCode.SharpZipLib.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.Office.Interop.Excel, Version=14.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c, processorArchitecture=MSIL">
       <EmbedInteropTypes>True</EmbedInteropTypes>
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.QualityTools.Testing.Fakes, Version=11.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
     <Reference Include="Microsoft.WindowsAPICodePack">
-      <HintPath>..\..\..\..\..\..\downloads\Soft\microsoft\Windows API Code Pack 1.1\Windows API Code Pack 1.1\binaries\Microsoft.WindowsAPICodePack.dll</HintPath>
+      <HintPath>F:\Downloads\Software\DotNetLibrary\Windows API Code Pack 1.1\Windows API Code Pack 1.1\binaries\Microsoft.WindowsAPICodePack.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.WindowsAPICodePack.ExtendedLinguisticServices">
+      <HintPath>F:\Downloads\Software\DotNetLibrary\Windows API Code Pack 1.1\Windows API Code Pack 1.1\binaries\Microsoft.WindowsAPICodePack.ExtendedLinguisticServices.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.WindowsAPICodePack.Sensors">
+      <HintPath>F:\Downloads\Software\DotNetLibrary\Windows API Code Pack 1.1\Windows API Code Pack 1.1\binaries\Microsoft.WindowsAPICodePack.Sensors.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.WindowsAPICodePack.Shell">
-      <HintPath>..\..\..\..\..\..\downloads\Soft\microsoft\Windows API Code Pack 1.1\Windows API Code Pack 1.1\binaries\Microsoft.WindowsAPICodePack.Shell.dll</HintPath>
+      <HintPath>F:\Downloads\Software\DotNetLibrary\Windows API Code Pack 1.1\Windows API Code Pack 1.1\binaries\Microsoft.WindowsAPICodePack.Shell.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.WindowsAPICodePack.ShellExtensions">
+      <HintPath>F:\Downloads\Software\DotNetLibrary\Windows API Code Pack 1.1\Windows API Code Pack 1.1\binaries\Microsoft.WindowsAPICodePack.ShellExtensions.dll</HintPath>
+    </Reference>
+    <Reference Include="NPOI">
+      <HintPath>F:\Downloads\Software\DotNetLibrary\npoi 2.0.1 (beta1)\npoi\dotnet4\NPOI.dll</HintPath>
+    </Reference>
+    <Reference Include="NPOI.OOXML">
+      <HintPath>F:\Downloads\Software\DotNetLibrary\npoi 2.0.1 (beta1)\npoi\dotnet4\NPOI.OOXML.dll</HintPath>
+    </Reference>
+    <Reference Include="NPOI.OpenXml4Net">
+      <HintPath>F:\Downloads\Software\DotNetLibrary\npoi 2.0.1 (beta1)\npoi\dotnet4\NPOI.OpenXml4Net.dll</HintPath>
+    </Reference>
+    <Reference Include="NPOI.OpenXmlFormats">
+      <HintPath>F:\Downloads\Software\DotNetLibrary\npoi 2.0.1 (beta1)\npoi\dotnet4\NPOI.OpenXmlFormats.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />

@@ -26,6 +26,7 @@ namespace Schedule_Test
     {
         private BackgroundWorker backgroundWorker;
         private BackgroundWorker allSchoolScheduleBW;
+        private BackgroundWorker btnXRhjxxConverterBW;
 
         private Excel.Application xlApp;
         private Excel.Workbook xlWb;
@@ -39,6 +40,10 @@ namespace Schedule_Test
         private Excel.Application allSchoolScheduleApp;
         private Excel.Workbook allSchoolScheduleWb;
         private Excel.Worksheet allSchoolScheduleWs;
+
+        private Excel.Application xRhjxxApp;
+        private Excel.Workbook xRhjxxWb;
+        private Excel.Worksheet xRhjxxWs;
 
         private Excel.Workbook resultScheduleWb;
         private Excel.Worksheet resultScheduleWs;
@@ -71,8 +76,17 @@ namespace Schedule_Test
             allSchoolScheduleBW.ProgressChanged += new ProgressChangedEventHandler(allSchoolScheduleBW_ProgressChanged);
             allSchoolScheduleBW.RunWorkerCompleted += new RunWorkerCompletedEventHandler(allSchoolScheduleBW_RunWorkerCompleted);
 
+            btnXRhjxxConverterBW = new BackgroundWorker();
+            btnXRhjxxConverterBW.WorkerReportsProgress = true;
+            btnXRhjxxConverterBW.WorkerSupportsCancellation = true;
+            btnXRhjxxConverterBW.DoWork += new DoWorkEventHandler(btnXRhjxxConverterBW_DoWork);
+            btnXRhjxxConverterBW.ProgressChanged += new ProgressChangedEventHandler(btnXRhjxxConverterBW_ProgressChanged);
+            btnXRhjxxConverterBW.RunWorkerCompleted += new RunWorkerCompletedEventHandler(btnXRhjxxConverterBW_RunWorkerCompleted);
+
             misValue = System.Reflection.Missing.Value;
         }
+
+#region 生成教学计划按钮相关代码
 
         private void btnConvertExcel_Click(object sender, RoutedEventArgs e)
         {
@@ -413,7 +427,7 @@ namespace Schedule_Test
             {
                 fileSavePath = openFolderDialog.FileName;
 
-                targetXlWb.SaveAs(fileSavePath+"教学计划"+dateTime.Year+dateTime.Month+dateTime.Day+dateTime.Hour+dateTime.Minute+".xls",
+                targetXlWb.SaveAs(fileSavePath+"\\教学计划"+dateTime.Year+dateTime.Month+dateTime.Day+dateTime.Hour+dateTime.Minute+".xls",
                                   Excel.XlFileFormat.xlWorkbookNormal,
                                   misValue,
                                   misValue,
@@ -428,7 +442,7 @@ namespace Schedule_Test
                 App.Current.Dispatcher.Invoke(new Action(() =>
                 {
                     txtTextBox.Text += "====================\n" +
-                                       "成功生成文件" + fileSavePath + "教学计划" + dateTime.Year + dateTime.Month + dateTime.Day + dateTime.Hour + dateTime.Minute + ".xls\n" +
+                                       "成功生成文件" + fileSavePath + "\\教学计划" + dateTime.Year + dateTime.Month + dateTime.Day + dateTime.Hour + dateTime.Minute + ".xls\n" +
                                        "====================\n";
                     txtTextBox.ScrollToEnd();
                 }));
@@ -453,6 +467,9 @@ namespace Schedule_Test
             MessageBox.Show("Mission Acomplished!!!");
         }
 
+#endregion
+
+#region "打开全校总课表->生成排课结果"按钮的相关代码
         private void ReadAllSchoolSchedule()
         {
             //在rhjxx33.xls中每个人对应的一行单独制成一个WorkSheet(可怜的表呀，第一范式也不满足)
@@ -537,6 +554,12 @@ namespace Schedule_Test
                             cellString = cellString.Replace("\n", ".");
                             tempSplitArry = cellString.Split('.');
 
+                            if (tempSplitArry.Length != 3)
+                            {
+                                MessageBox.Show("这个表不对头哦，只有班级没有学科！");
+                                
+                            }
+                            //传地址了吗？忘了tempResultRange是干什么用的了
                             tempResultRange = resultScheduleWs.Rows[resultScheduleLineNum];
 
                             //写入“排课结果的年级、班级两列
@@ -634,7 +657,7 @@ namespace Schedule_Test
 
                     string fileSavePath = openFolderDialog.FileName;
                     System.DateTime dateTime = System.DateTime.Now;
-                    resultScheduleWb.SaveAs(fileSavePath + "排课结果" + dateTime.Year + dateTime.Month + dateTime.Day + dateTime.Hour + dateTime.Minute + ".xls",
+                    resultScheduleWb.SaveAs(fileSavePath + "\\排课结果" + dateTime.Year + dateTime.Month + dateTime.Day + dateTime.Hour + dateTime.Minute + ".xls",
                                       Excel.XlFileFormat.xlWorkbookNormal,
                                       misValue,
                                       misValue,
@@ -649,7 +672,7 @@ namespace Schedule_Test
                     App.Current.Dispatcher.Invoke(new Action(() =>
                     {
                         txtTextBox.Text += "====================\n" +
-                                           "成功生成文件" + fileSavePath + "排课结果" + dateTime.Year + dateTime.Month + dateTime.Day + dateTime.Hour + dateTime.Minute + ".xls" +
+                                           "成功生成文件" + fileSavePath + "\\排课结果" + dateTime.Year + dateTime.Month + dateTime.Day + dateTime.Hour + dateTime.Minute + ".xls" +
                                            "====================\n";
                         txtTextBox.ScrollToEnd();
                     }));
@@ -678,11 +701,11 @@ namespace Schedule_Test
         {
             if (e.ProgressPercentage == 0)
             {
-                probarConvertProgress.IsIndeterminate = true;
+                //probarConvertProgress.IsIndeterminate = true;
             }
             else if (e.ProgressPercentage == 100)
             {
-                probarConvertProgress.IsIndeterminate = false;
+              //  probarConvertProgress.IsIndeterminate = false;
             }
         }
 
@@ -698,5 +721,344 @@ namespace Schedule_Test
                 allSchoolScheduleBW.RunWorkerAsync();
             }
         }
+
+#endregion
+
+        #region “重庆天地课表转换”按钮相关代码
+
+        private void btnXRhjxxConverter_Click(object sender, RoutedEventArgs e)
+        {
+            if (btnXRhjxxConverterBW.IsBusy != true)
+            {
+                btnXRhjxxConverterBW.RunWorkerAsync();
+            }
+        }
+
+        private void btnXRhjxxConverterBW_DoWork(object sender, DoWorkEventArgs e)
+        {
+            XRhjxxConverter();
+        }
+
+        private void btnXRhjxxConverterBW_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        {
+            if (e.ProgressPercentage == 0)
+            {
+                probarConvertProgress.IsIndeterminate = true;
+            }
+            else if (e.ProgressPercentage == 100)
+            {
+                probarConvertProgress.IsIndeterminate = false;
+            }
+        }
+
+        private void btnXRhjxxConverterBW_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            MessageBox.Show("重庆天地课表转换完成!");
+        }
+
+        private void XRhjxxConverter()
+        {
+            CommonOpenFileDialog openFileDialog = new CommonOpenFileDialog();
+            CommonFileDialogFilter filter = new CommonFileDialogFilter("*.xls文件", ".xls");
+            openFileDialog.Filters.Add(filter);
+            CommonFileDialogResult commonFileDialogResult = CommonFileDialogResult.None;
+
+            App.Current.Dispatcher.Invoke(new Action(() =>
+            {
+                commonFileDialogResult = openFileDialog.ShowDialog();
+            }));
+
+            if (commonFileDialogResult == CommonFileDialogResult.Ok)
+            {
+                //btnXRhjxxConverterBW.ReportProgress(0);
+
+                xlFilePath = openFileDialog.FileName;
+
+                xRhjxxApp = new Excel.Application();
+                //allSchoolScheduleApp.Visible = false;
+                xRhjxxWb = xRhjxxApp.Workbooks.Open(xlFilePath, 0, true, 5, "", "", true, Microsoft.Office.Interop.Excel.XlPlatform.xlWindows, "\t", false, false, 0, true, 1, 0);
+                xRhjxxWs = (Excel.Worksheet)xRhjxxWb.Worksheets.get_Item(1);
+
+                App.Current.Dispatcher.Invoke(new Action(() =>
+                {
+                    txtTextBox.Text += "====================\n" +
+                                       "开始对文件 " + xlFilePath + "进行处理\n" +
+                                       "====================\n";
+                    txtTextBox.ScrollToEnd();
+                }));
+
+                Excel.Range range;
+
+                range = xRhjxxWs.UsedRange;
+
+                int rowCount, rCount, cCount;
+                rCount = range.Rows.Count;
+                cCount = range.Columns.Count;
+
+               // string strClass = "";
+              //  string strGrade = "";
+                string strClassAndGrade = "";
+                string[] strClassGradeSplitArry;
+
+                string[] strSubjectTeacherSplitArray;
+
+                int intClassWeek;
+                /* MessageBox.Show("rCount: " + rCount + "cCount: " + cCount);*/
+
+                //结果表，将排课结果汇总，最后输出该表即可
+                resultScheduleWb = xRhjxxApp.Workbooks.Add();
+                resultScheduleWs = (Excel.Worksheet)resultScheduleWb.Worksheets.get_Item(1);
+
+                //临时存储表格一行的内容
+                Excel.Range tempResultRange;
+                Excel.Range rangeClassesNum;
+                rangeClassesNum = range.Rows[2];
+
+                /* 生成“排课结果” */
+                resultScheduleWs.Cells[1, 1] = "年级";
+                resultScheduleWs.Cells[1, 2] = "班级";
+                resultScheduleWs.Cells[1, 3] = "课程";
+                resultScheduleWs.Cells[1, 4] = "教师";
+                resultScheduleWs.Cells[1, 5] = "场地";
+                resultScheduleWs.Cells[1, 6] = "星期";
+                resultScheduleWs.Cells[1, 7] = "节次";
+                resultScheduleLineNum = 2;
+                Excel.Range currentResultScheduleRow;
+
+                //跳过两行表头
+                for (rowCount = 3; rowCount < rCount + 1; rowCount++)
+                {
+                    //tempResultRange=全校班级总课表.xls中的第几行
+                    tempResultRange = range.Rows[rowCount];
+
+                    strClassAndGrade = tempResultRange.Columns[1].Value2.ToString();
+                    strClassAndGrade = strClassAndGrade.Replace("级", "级.");
+
+                    strClassGradeSplitArry = strClassAndGrade.Split('.');
+                    strClassGradeSplitArry[1] = strClassGradeSplitArry[1].Replace("班", "");
+
+                    
+                    //生成排课结果表
+                    App.Current.Dispatcher.Invoke(new Action(() =>
+                    {
+                        txtTextBox.Text += "正在生成 " + strClassAndGrade + " 的排课结果\n";
+                        txtTextBox.ScrollToEnd();
+                    }));
+
+                    //编号是从1开始的，所以后边要+1
+                    for (int colCount = 2; colCount < cCount + 1; colCount++)
+                    {
+                        strSubjectTeacherSplitArray = tempResultRange.Columns[colCount].Value2.ToString().Split('\n');
+
+                        currentResultScheduleRow = resultScheduleWs.Rows[resultScheduleLineNum];
+                        currentResultScheduleRow.Columns[1].Value2 = strClassGradeSplitArry[0];
+                        currentResultScheduleRow.Columns[2].Value2 = strClassGradeSplitArry[0] + "(" + strClassGradeSplitArry[1] + ")";
+                        currentResultScheduleRow.Columns[3].Value2 = strSubjectTeacherSplitArray[0];
+                        currentResultScheduleRow.Columns[4].Value2 = strSubjectTeacherSplitArray[1];
+                        currentResultScheduleRow.Columns[5].Value2 = "自动";
+
+                        //计算星期几
+                        intClassWeek = int.Parse(Math.Ceiling((colCount - 1F) / 6F).ToString());
+
+                        switch (intClassWeek)
+                            {
+                                case 1:
+                                    currentResultScheduleRow.Columns[6].Value2 = "星期一";
+                                    break;
+
+                                case 2:
+                                    currentResultScheduleRow.Columns[6].Value2 = "星期二";
+                                    break;
+
+                                case 3:
+                                    currentResultScheduleRow.Columns[6].Value2 = "星期三";
+                                    break;
+
+                                case 4:
+                                    currentResultScheduleRow.Columns[6].Value2 = "星期四";
+                                    break;
+
+                                case 5:
+                                    currentResultScheduleRow.Columns[6].Value2 = "星期五";
+                                    break;
+                            }
+
+                        
+                        currentResultScheduleRow.Columns[7].Value2 = rangeClassesNum.Columns[colCount].Value2.ToString();
+
+                        resultScheduleLineNum++;
+                    }
+
+                   
+
+                    
+                }
+
+                /*
+
+                //这里先试试一个人的
+                string cellString = "";
+                string[] tempSplitArry;
+                int tempWeek;
+                //int tempYear = System.DateTime.Now.Year;
+                Excel.Range tempResultRange;
+
+                for (rowCount = 4; rowCount < rCount + 1; rowCount++)
+                {
+                    App.Current.Dispatcher.Invoke(new Action(() =>
+                    {
+                        txtTextBox.Text += "正在生成 " + range.Rows[rowCount].Columns[1].Value2.ToString() + " 的排课结果\n";
+                        txtTextBox.ScrollToEnd();
+                    }));
+
+                    //colCount = 2是为了避过姓名一列,colCount是从1号开始的cCount要加一
+                    for (int colCount = 2; colCount < cCount + 1; colCount++)
+                    {
+
+                        if (range.Rows[rowCount].Columns[colCount].Value2 != null)
+                        {
+                            cellString = range.Rows[rowCount].Columns[colCount].Value2.ToString();
+                            cellString = cellString.Replace("\n", ".");
+                            tempSplitArry = cellString.Split('.');
+
+                            if (tempSplitArry.Length != 3)
+                            {
+                                MessageBox.Show("这个表不对头哦，只有班级没有学科！");
+
+                            }
+
+                            tempResultRange = resultScheduleWs.Rows[resultScheduleLineNum];
+
+                            //写入“排课结果的年级、班级两列
+                            switch (tempSplitArry[0])
+                            {
+                                case "小六":
+                                    tempResultRange.Columns[1].Value2 = "六年级";
+                                    tempResultRange.Columns[2].Value2 = "六年级(" + tempSplitArry[1] + ")";
+                                    break;
+
+                                case "小五":
+                                    tempResultRange.Columns[1].Value2 = "五年级";
+                                    tempResultRange.Columns[2].Value2 = "五年级(" + tempSplitArry[1] + ")";
+                                    break;
+
+                                case "小四":
+                                    tempResultRange.Columns[1].Value2 = "四年级";
+                                    tempResultRange.Columns[2].Value2 = "四年级(" + tempSplitArry[1] + ")";
+                                    break;
+
+                                case "小三":
+                                    tempResultRange.Columns[1].Value2 = "三年级";
+                                    tempResultRange.Columns[2].Value2 = "三年级(" + tempSplitArry[1] + ")";
+                                    break;
+
+                                case "小二":
+                                    tempResultRange.Columns[1].Value2 = "二年级";
+                                    tempResultRange.Columns[2].Value2 = "二年级(" + tempSplitArry[1] + ")";
+                                    break;
+
+                                case "小一":
+                                    tempResultRange.Columns[1].Value2 = "一年级";
+                                    tempResultRange.Columns[2].Value2 = "一年级(" + tempSplitArry[1] + ")";
+                                    break;
+                            }
+
+                            //写入课程
+                            tempResultRange.Columns[3].Value2 = tempSplitArry[2];
+
+                            //写入教师
+                            tempResultRange.Columns[4].Value2 = range.Rows[rowCount].Columns[1].Value2;
+
+                            //写入场地
+                            tempResultRange.Columns[5].Value2 = "自动";
+
+                            //写入星期
+                            tempWeek = int.Parse(Math.Ceiling((colCount - 1F) / 6F).ToString());
+                            switch (tempWeek)
+                            {
+                                case 1:
+                                    tempResultRange.Columns[6].Value2 = "星期一";
+                                    break;
+
+                                case 2:
+                                    tempResultRange.Columns[6].Value2 = "星期二";
+                                    break;
+
+                                case 3:
+                                    tempResultRange.Columns[6].Value2 = "星期三";
+                                    break;
+
+                                case 4:
+                                    tempResultRange.Columns[6].Value2 = "星期四";
+                                    break;
+
+                                case 5:
+                                    tempResultRange.Columns[6].Value2 = "星期五";
+                                    break;
+                            }
+                            //写入节次
+                            tempResultRange.Columns[7].Value2 = range.Rows[3].Columns[colCount].Value2;
+
+                            resultScheduleLineNum++;
+                        }
+                    }
+
+
+
+                }
+                */
+                CommonOpenFileDialog openFolderDialog = new CommonOpenFileDialog();
+                openFolderDialog.IsFolderPicker = true;
+                openFolderDialog.Title = "选择文件保存目录";
+                //openFolderDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
+                commonFileDialogResult = CommonFileDialogResult.None;
+                App.Current.Dispatcher.Invoke(new Action(() =>
+                {
+                    commonFileDialogResult = openFolderDialog.ShowDialog();
+                }));
+
+
+                if (commonFileDialogResult == CommonFileDialogResult.Ok)
+                {
+                    btnXRhjxxConverterBW.ReportProgress(100);
+
+                    string fileSavePath = openFolderDialog.FileName;
+                    System.DateTime dateTime = System.DateTime.Now;
+                    resultScheduleWb.SaveAs(fileSavePath + "\\排课结果" + dateTime.Year + dateTime.Month + dateTime.Day + dateTime.Hour + dateTime.Minute + ".xls",
+                                      Excel.XlFileFormat.xlWorkbookNormal,
+                                      misValue,
+                                      misValue,
+                                      misValue,
+                                      misValue,
+                                      Excel.XlSaveAsAccessMode.xlExclusive);
+
+                    resultScheduleWb.Close(false);
+                    xRhjxxWb.Close(false);
+                    xRhjxxApp.Quit();
+
+                    App.Current.Dispatcher.Invoke(new Action(() =>
+                    {
+                        txtTextBox.Text += "====================\n" +
+                                           "成功生成文件" + fileSavePath + "\\排课结果" + dateTime.Year + dateTime.Month + dateTime.Day + dateTime.Hour + dateTime.Minute + ".xls" +
+                                           "====================\n";
+                        txtTextBox.ScrollToEnd();
+                    }));
+                }
+                else if (commonFileDialogResult == CommonFileDialogResult.Cancel)
+                {
+                    App.Current.Dispatcher.Invoke(new Action(() =>
+                    {
+                        txtTextBox.Text += "====================\n" +
+                                           "排课结果 未保存\n" +
+                                           "====================\n";
+                        txtTextBox.ScrollToEnd();
+                    }));
+                }
+
+                MessageBox.Show("Mission Accomplished!!!");
+            }
+        }
+
+#endregion
     }
 }
