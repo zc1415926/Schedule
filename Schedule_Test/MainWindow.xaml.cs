@@ -762,21 +762,11 @@ namespace Schedule_Test
 
         private void XRhjxxConverter()
         {
-            CommonOpenFileDialog openFileDialog = new CommonOpenFileDialog();
-            CommonFileDialogFilter filter = new CommonFileDialogFilter("*.xls文件", ".xls");
-            openFileDialog.Filters.Add(filter);
-            CommonFileDialogResult commonFileDialogResult = CommonFileDialogResult.None;
-
-            App.Current.Dispatcher.Invoke(new Action(() =>
-            {
-                commonFileDialogResult = openFileDialog.ShowDialog();
-            }));
-
-            if (commonFileDialogResult == CommonFileDialogResult.Ok)
+            xlFilePath = OpenExcelFile();
+            
+            if("" != xlFilePath)
             {
                 //btnXRhjxxConverterBW.ReportProgress(0);
-
-                xlFilePath = openFileDialog.FileName;
 
                 xRhjxxApp = new Excel.Application();
                 //allSchoolScheduleApp.Visible = false;
@@ -799,8 +789,6 @@ namespace Schedule_Test
                 rCount = range.Rows.Count;
                 cCount = range.Columns.Count;
 
-               // string strClass = "";
-              //  string strGrade = "";
                 string strClassAndGrade = "";
                 string[] strClassGradeSplitArry;
 
@@ -832,7 +820,7 @@ namespace Schedule_Test
                 resultScheduleLineNum = 2;
                 Excel.Range currentResultScheduleRow;
 
-                
+                string strClass = "";
 
                 //跳过两行表头
                 for (rowCount = 3; rowCount < rCount + 1; rowCount++)
@@ -841,44 +829,35 @@ namespace Schedule_Test
                     tempResultRange = range.Rows[rowCount];
 
                     strClassAndGrade = tempResultRange.Columns[1].Value2.ToString();
-                    strClassAndGrade = strClassAndGrade.Replace("级", "级.");
 
-                    strClassGradeSplitArry = strClassAndGrade.Split('.');
-                    strClassGradeSplitArry[1] = strClassGradeSplitArry[1].Replace("班", "");
-
-                    
-                    //生成排课结果表
                     App.Current.Dispatcher.Invoke(new Action(() =>
                     {
                         txtTextBox.Text += "正在生成 " + strClassAndGrade + " 的排课结果\n";
                         txtTextBox.ScrollToEnd();
                     }));
 
+                    strClassAndGrade = strClassAndGrade.Replace("级", "级.");
+
+                    strClassGradeSplitArry = strClassAndGrade.Split('.');
+                    strClassGradeSplitArry[1] = strClassGradeSplitArry[1].Replace("班", "");
+
                     //编号是从1开始的，所以后边要+1
                     for (int colCount = 2; colCount < cCount + 1; colCount++)
                     {
                         strSubjectTeacherSplitArray = tempResultRange.Columns[colCount].Value2.ToString().Split('\n');
-
+                        strClass = strClassGradeSplitArry[0];
                         //Range赋值传的是引用
                         currentResultScheduleRow = resultScheduleWs.Rows[resultScheduleLineNum];
-                        
                         //年级
-                        currentResultScheduleRow.Columns[1].Value2 = strClassGradeSplitArry[0];
-                        
+                        currentResultScheduleRow.Columns[1].Value2 = strClass;
                         //班级
-                        currentResultScheduleRow.Columns[2].Value2 = strClassGradeSplitArry[0] + "(" + strClassGradeSplitArry[1] + ")";
-                        
+                        currentResultScheduleRow.Columns[2].Value2 = strClass + "(" + strClassGradeSplitArry[1] + ")";
                         //课程
                         currentResultScheduleRow.Columns[3].Value2 = strSubjectTeacherSplitArray[0];
-                        
                         //教师
                         currentResultScheduleRow.Columns[4].Value2 = strSubjectTeacherSplitArray[1];
-                       
                         //场地
                         currentResultScheduleRow.Columns[5].Value2 = "自动";
-                        
-
-
 
                         //计算星期几
                         intClassWeek = int.Parse(Math.Ceiling((colCount - 1F) / 6F).ToString());
@@ -919,57 +898,6 @@ namespace Schedule_Test
 
                 SaveExcelFile("重庆天地校区-排课结果", resultScheduleWb);
 
-               /* CommonOpenFileDialog openFolderDialog = new CommonOpenFileDialog();
-                openFolderDialog.IsFolderPicker = true;
-                openFolderDialog.Title = "选择文件保存目录";
-                //openFolderDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
-                commonFileDialogResult = CommonFileDialogResult.None;
-                App.Current.Dispatcher.Invoke(new Action(() =>
-                {
-                    commonFileDialogResult = openFolderDialog.ShowDialog();
-                }));
-
-
-                if (commonFileDialogResult == CommonFileDialogResult.Ok)
-                {
-                    btnXRhjxxConverterBW.ReportProgress(100);
-
-                    string fileSavePath = openFolderDialog.FileName;
-                    System.DateTime dateTime = System.DateTime.Now;
-                    resultScheduleWb.SaveAs(fileSavePath + "\\重庆天地校区-排课结果" + dateTime.Year + dateTime.Month + dateTime.Day + dateTime.Hour + dateTime.Minute + ".xls",
-                                      Excel.XlFileFormat.xlWorkbookNormal,
-                                      misValue,
-                                      misValue,
-                                      misValue,
-                                      misValue,
-                                      Excel.XlSaveAsAccessMode.xlExclusive);
-
-///                    resultScheduleWb.Close(false);
-///                   xRhjxxWb.Close(false);
-///                    xRhjxxApp.Quit();
-
-                    App.Current.Dispatcher.Invoke(new Action(() =>
-                    {
-                        txtTextBox.Text += "====================\n" +
-                                           "成功生成文件" + fileSavePath + "\\重庆天地校区-排课结果" + dateTime.Year + dateTime.Month + dateTime.Day + dateTime.Hour + dateTime.Minute + ".xls" +
-                                           "====================\n";
-                        txtTextBox.ScrollToEnd();
-                    }));
-                }
-                else if (commonFileDialogResult == CommonFileDialogResult.Cancel)
-                {
-                    App.Current.Dispatcher.Invoke(new Action(() =>
-                    {
-                        txtTextBox.Text += "====================\n" +
-                                           "排课结果 未保存\n" +
-                                           "====================\n";
-                        txtTextBox.ScrollToEnd();
-                    }));
-                }*/
-
-               // MessageBox.Show("Mission Accomplished!!!");
-
-
                 //教学计划
                 teachingPlanWs.Cells[1, 1] = "年级";
                 teachingPlanWs.Cells[1, 2] = "班级";
@@ -992,6 +920,8 @@ namespace Schedule_Test
                 string strTeacher = "";
                 string strSubject = "";
 
+                string strCompareClassAndGrade = "";
+
                 for (rowCount = 2; rowCount < rCount + 1; rowCount++)
                 {
                     teachingPlanRow = range.Rows[rowCount];
@@ -999,6 +929,18 @@ namespace Schedule_Test
                     strClassAndGrade = teachingPlanRow.Columns[2].Value2.ToString();
                     strSubject = teachingPlanRow.Columns[3].Value2.ToString();
                     strTeacher = teachingPlanRow.Columns[4].Value2.ToString();
+
+                    if (strCompareClassAndGrade != strClassAndGrade)
+                    {
+                        strCompareClassAndGrade = strClassAndGrade;
+
+                        App.Current.Dispatcher.Invoke(new Action(() =>
+                        {
+                            txtTextBox.Text += "正在处理 " + strCompareClassAndGrade + " 的教学计划\n";
+                            txtTextBox.ScrollToEnd();
+                        }));
+                    }
+                    
 
                     if (!dicClassGradeSubjectTeacherToTimes.ContainsKey(strClassAndGrade + "." + strSubject + "." + strTeacher))
                     {
@@ -1011,19 +953,33 @@ namespace Schedule_Test
 
                 }
 
+                //string dicKey = "";
+                string[] strClassGradeSubjectTeacherArray;
+               
                 rowCount = 2;
+                
                 foreach (KeyValuePair<string, byte> dic in dicClassGradeSubjectTeacherToTimes)
                 {
-                    teachingPlanWs.Rows[rowCount].Columns[1].Value2 = dic.Key.Substring(0, 3);
-                    teachingPlanWs.Rows[rowCount].Columns[2].Value2 = dic.Key.Substring(0, 6);
-                    teachingPlanWs.Rows[rowCount].Columns[3].Value2 = dic.Key.Split('.')[1];
-                    teachingPlanWs.Rows[rowCount].Columns[4].Value2 = dic.Key.Split('.')[2];
+                   // dicKey = dic.Key;
+                    strClassGradeSubjectTeacherArray = dic.Key.Split('.');
+                    strClassAndGrade = strClassGradeSubjectTeacherArray[0];
+                    strSubject = strClassGradeSubjectTeacherArray[1];
+                    //年级
+                    teachingPlanWs.Rows[rowCount].Columns[1].Value2 = strClassAndGrade.Substring(0, 3);//dicKey.Substring(0, 3);
+                    //班级
+                    teachingPlanWs.Rows[rowCount].Columns[2].Value2 = strClassAndGrade;
+                    //课程
+                    teachingPlanWs.Rows[rowCount].Columns[3].Value2 = strSubject;
+                    //教师
+                    teachingPlanWs.Rows[rowCount].Columns[4].Value2 = strClassGradeSubjectTeacherArray[2];
+                    //周课时
                     teachingPlanWs.Rows[rowCount].Columns[6].Value2 = dic.Value.ToString();
+                    //所在校区
                     teachingPlanWs.Rows[rowCount].Columns[10].Value2 = "重庆天地";
 
                     App.Current.Dispatcher.Invoke(new Action(() =>
                     {
-                        txtTextBox.Text += "正在生成 " + dic.Key.Substring(0, 6) + " 的教学计划\n";
+                        txtTextBox.Text += "正在生成教学计划\n        " + strClassAndGrade + "班 " + strSubject + "\n";
                         txtTextBox.ScrollToEnd();
                     }));
 
@@ -1032,8 +988,37 @@ namespace Schedule_Test
 
 
                 SaveExcelFile("重庆天地校区-教学计划", teachingPlanWb);
-                
+
+
+                resultScheduleWb.Close(false);
+                teachingPlanWb.Close(false);
+                xRhjxxWb.Close(false);
+                xRhjxxApp.Quit();
             }
+        }
+
+        private string OpenExcelFile()
+        {
+            CommonOpenFileDialog openFileDialog = new CommonOpenFileDialog();
+            CommonFileDialogFilter filter = new CommonFileDialogFilter("*.xls文件", ".xls");
+            openFileDialog.Filters.Add(filter);
+            CommonFileDialogResult commonFileDialogResult = CommonFileDialogResult.None;
+
+            App.Current.Dispatcher.Invoke(new Action(() =>
+            {
+                commonFileDialogResult = openFileDialog.ShowDialog();
+            }));
+
+            if (commonFileDialogResult == CommonFileDialogResult.Ok)
+            {
+                return openFileDialog.FileName;
+            }
+            else
+            {
+                return "";
+            }
+
+            
         }
 
         private void SaveExcelFile(string fileCoreName, Excel.Workbook workbook)
