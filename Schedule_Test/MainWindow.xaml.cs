@@ -994,6 +994,7 @@ namespace Schedule_Test
                 teachingPlanWb.Close(false);
                 xRhjxxWb.Close(false);
                 xRhjxxApp.Quit();
+               // 干脆做成存储成mdb格式
             }
         }
 
